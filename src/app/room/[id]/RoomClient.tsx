@@ -46,7 +46,8 @@ interface Player {
   isHost: boolean;
   isLocked: boolean;
   roomId: string;
-  rolesHistory?: string;
+  rolesHistory: string | null;
+  createdAt: Date;
 }
 
 interface RoomData {
