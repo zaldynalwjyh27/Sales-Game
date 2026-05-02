@@ -1,6 +1,6 @@
 'use client';
 
-import { Player } from '@/lib/jisr-constants';
+
 
 interface PlayerRoleDisplayProps {
   player: Player;
