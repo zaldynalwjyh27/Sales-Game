@@ -44,8 +44,9 @@ interface Player {
   name: string;
   role: string | null;
   isHost: boolean;
-  isLocked: boolean; // Added for preventing name changes after session starts
+  isLocked: boolean;
   roomId: string;
+  rolesHistory?: string;
 }
 
 interface RoomData {
