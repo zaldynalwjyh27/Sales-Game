@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Room {
+  id                   String        @id @default(uuid())
+  status               String        @default("LOBBY") // LOBBY, IN_PROGRESS, REVEALING, REVEALED
+  currentRound         Int           @default(1)
+  scenarioId           Int?
+  questionCount        Int           @default(5) // Number of questions: 3 / 5 / 7 / 10
+  questionType         String        @default("MIXED") // EXPLORATION / OBJECTION_HANDLING / CLOSING / MIXED
+  players              Player[]
+  messages             Message[]
+  evaluations          Evaluation[]
+  achievements         Achievement[]
+  challenges           Challenge[]
+  playerScores         PlayerScore[]
+  createdAt            DateTime      @default(now())
+}
+
+model Player {
+  id             String        @id @default(uuid())
+  roomId         String
+  name           String
+  role           String?       // SELLER, CLIENT, EVALUATOR
+  isHost         Boolean       @default(false)
+  isLocked       Boolean       @default(false) // Prevents name changes after session starts
+  rolesHistory   String?       @default("[]") // JSON array of roles played: ["SELLER", "CLIENT"]
+  room           Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sentMessages   Message[]
+  evaluations    Evaluation[]  @relation("Evaluator")
+  targetEvals    Evaluation[]  @relation("Target")
+  playerScores   PlayerScore[]
+  achievements   Achievement[]
+  challenges     Challenge[]   // Challenges assigned to the player
+  createdAt      DateTime      @default(now())
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  roomId    String
+  senderId  String?  // null if AI
+  content   String
+  isAi      Boolean  @default(false)
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender    Player?  @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Evaluation {
+  id          String   @id @default(uuid())
+  roomId      String
+  evaluatorId String
+  targetId    String
+  roundNumber Int      @default(1)
+  scores      String   // JSON string of the 5 criteria scores (1-5 stars each = 25 max)
+  notes       String?  // Optional written notes
+  revealed    Boolean  @default(false)
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  evaluator   Player   @relation("Evaluator", fields: [evaluatorId], references: [id], onDelete: Cascade)
+  target      Player   @relation("Target", fields: [targetId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+// Model for storing player scores across rounds
+model PlayerScore {
+  id          String   @id @default(uuid())
+  playerId    String
+  roomId      String
+  roundNumber Int
+  totalScore  Float    // Average of evaluator scores
+  createdAt   DateTime @default(now())
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+// Model for achievements/rewards
+model Achievement {
+  id        String   @id @default(uuid())
+  playerId  String
+  roomId    String
+  title     String   // Achievement name
+  description String // Description of the achievement
+  icon      String   // Icon identifier
+  earnedAt  DateTime @default(now())
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+// Model for random challenge cards during sessions
+model Challenge {
+  id        String   @id @default(uuid())
+  roomId    String
+  playerId  String?
+  challenge String   // Challenge description
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  player    Player?  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
