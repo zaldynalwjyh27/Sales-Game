@@ -10,11 +10,16 @@ import { useRouter } from 'next/navigation';
 
 interface Evaluation {
   id: string;
-  evaluator?: { name: string };
-  target?: { name: string };
-  roundNumber: number;
-  scores: string;
+  evaluator: {
+    name: string;
+  };
+  target?: {
+    name: string;
+  };
+  scores: string; // JSON string of scores
   notes?: string;
+  targetId: string;
+  roundNumber: number;
 }
 
 interface ResultsRevealProps {

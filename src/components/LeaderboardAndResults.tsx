@@ -19,6 +19,9 @@ interface Evaluation {
   evaluator: {
     name: string;
   };
+  target?: {
+    name: string;
+  };
   scores: string; // JSON string of scores
   notes?: string;
   targetId: string;
