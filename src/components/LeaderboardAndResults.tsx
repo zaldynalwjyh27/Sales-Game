@@ -21,6 +21,8 @@ interface Evaluation {
   };
   scores: string; // JSON string of scores
   notes?: string;
+  targetId: string;
+  roundNumber: number;
 }
 
 interface LeaderboardAndResultsProps {
