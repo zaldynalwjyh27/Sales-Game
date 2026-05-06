@@ -65,8 +65,13 @@ export function RoleCardDisplay({ role, scenarioId }: RoleCardProps) {
 
         <Separator />
 
-        {role === 'CLIENT' && (
+        {(role === 'CLIENT' || role === 'EVALUATOR') && (
           <div className="space-y-4">
+            {role === 'EVALUATOR' && (
+              <Badge variant="outline" className="text-[10px] font-bold uppercase text-destructive border-destructive/20 bg-destructive/5">
+                تعليمات العميل (سري)
+              </Badge>
+            )}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-destructive font-bold text-sm">
                 <AlertCircle className="h-4 w-4" />
@@ -99,12 +104,19 @@ export function RoleCardDisplay({ role, scenarioId }: RoleCardProps) {
           </div>
         )}
 
-        {role === 'SELLER' && (
+        {role === 'EVALUATOR' && <Separator className="my-4 border-dashed" />}
+
+        {(role === 'SELLER' || role === 'EVALUATOR') && (
           <div className="space-y-4">
+            {role === 'EVALUATOR' && (
+              <Badge variant="outline" className="text-[10px] font-bold uppercase text-primary border-primary/20 bg-primary/5">
+                تعليمات البائع (سري)
+              </Badge>
+            )}
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-primary font-bold text-sm">
                 <Target className="h-4 w-4" />
-                أهدافك في هذه الجولة:
+                أهداف البائع في هذه الجولة:
               </div>
               <ul className="space-y-2">
                 {[
@@ -129,9 +141,10 @@ export function RoleCardDisplay({ role, scenarioId }: RoleCardProps) {
           <div className="space-y-4 text-center py-6 border border-dashed rounded-2xl bg-muted/20">
             <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground opacity-50 mb-2" />
             <p className="text-sm font-medium">أنت في وضع المراقبة</p>
-            <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">قم بتقييم أداء البائع بناءً على ردود أفعال العميل وجودة الأسئلة.</p>
+            <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">قم بتقييم أداء البائع بناءً على ردود أفعال العميل وجودة الأسئلة ومقارنتها بالتعليمات أعلاه.</p>
           </div>
         )}
+
       </CardContent>
     </Card>
   );
