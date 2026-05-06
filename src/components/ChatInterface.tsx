@@ -5,6 +5,9 @@ import { getPusherClient } from '@/lib/pusher-client';
 import { sendMessage } from '@/server/actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { MessageCircle, Send, ShieldAlert, Bot } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -79,28 +82,37 @@ export function ChatInterface({
   const isEvaluator = role === 'EVALUATOR';
 
   return (
-    <div
-      className="flex flex-col h-[500px] border rounded-xl bg-white dark:bg-slate-900 shadow-lg overflow-hidden"
-      dir="rtl"
-    >
+    <Card className="flex flex-col h-[600px] shadow-lg border overflow-hidden" dir="rtl">
       {/* Header */}
-      <div className="px-5 py-3 border-b bg-gradient-to-l from-blue-600 to-indigo-700 text-white font-semibold text-lg flex items-center gap-2">
-        <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-        المحادثة المباشرة
-      </div>
+      <CardHeader className="py-3 px-5 border-b bg-muted/30">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MessageCircle className="h-4 w-4 text-primary" />
+            المحادثة المباشرة
+          </CardTitle>
+          <div className="flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase">نشط</span>
+          </div>
+        </div>
+      </CardHeader>
 
       {/* Messages */}
-      <div className="flex-1 p-4 overflow-y-auto" ref={scrollRef}>
+      <CardContent className="flex-1 p-4 overflow-y-auto bg-background/50" ref={scrollRef}>
         <div className="space-y-4">
           {messages.length === 0 && (
-            <p className="text-center text-slate-400 text-sm mt-10">
-              لا توجد رسائل بعد. ابدأ المحادثة!
-            </p>
+            <div className="flex flex-col items-center justify-center h-full opacity-30 mt-20">
+              <MessageCircle className="h-12 w-12 mb-2" />
+              <p className="text-sm">لا توجد رسائل بعد. ابدأ المحادثة!</p>
+            </div>
           )}
           {messages.map((msg) => {
             const isMe = msg.senderId === playerId;
             const senderName = msg.isAi
-              ? 'العميل (ذكاء اصطناعي)'
+              ? 'العميل'
               : msg.sender?.name || 'مجهول';
 
             return (
@@ -108,14 +120,17 @@ export function ChatInterface({
                 key={msg.id}
                 className={`flex flex-col ${isMe ? 'items-start' : 'items-end'}`}
               >
-                <span className="text-xs text-slate-500 mb-1 px-1">
-                  {senderName}
-                </span>
+                <div className="flex items-center gap-1.5 mb-1 px-1">
+                  {msg.isAi && <Badge variant="secondary" className="h-4 text-[9px] px-1.5 gap-1"><Bot className="h-2 w-2"/> ذكاء اصطناعي</Badge>}
+                  <span className="text-[10px] font-bold text-muted-foreground">
+                    {senderName}
+                  </span>
+                </div>
                 <div
-                  className={`px-4 py-2.5 rounded-2xl max-w-[80%] leading-relaxed ${
+                  className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm leading-relaxed shadow-sm ${
                     isMe
-                      ? 'bg-blue-600 text-white rounded-tr-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-sm border border-slate-200 dark:border-slate-700'
+                      ? 'bg-primary text-primary-foreground rounded-tr-none'
+                      : 'bg-muted text-foreground rounded-tl-none border'
                   }`}
                 >
                   {msg.content}
@@ -124,29 +139,32 @@ export function ChatInterface({
             );
           })}
         </div>
-      </div>
+      </CardContent>
 
       {/* Input */}
-      <div className="p-3 border-t bg-slate-50 dark:bg-slate-800">
+      <CardFooter className="p-3 border-t bg-muted/20">
         {isEvaluator ? (
-          <p className="text-center text-sm text-slate-500">
+          <div className="w-full flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground bg-background/50 border rounded-lg border-dashed">
+            <ShieldAlert className="h-3.5 w-3.5" />
             أنت في وضع المراقبة ولا يمكنك الإرسال.
-          </p>
+          </div>
         ) : (
-          <form onSubmit={handleSend} className="flex gap-2">
+          <form onSubmit={handleSend} className="flex w-full gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="اكتب رسالتك هنا..."
-              className="flex-1"
+              className="flex-1 bg-background"
               disabled={isSending}
             />
-            <Button type="submit" disabled={isSending || !input.trim()}>
-              إرسال
+            <Button type="submit" disabled={isSending || !input.trim()} size="icon" className="shrink-0">
+              <Send className="h-4 w-4" />
+              <span className="sr-only">إرسال</span>
             </Button>
           </form>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
+

@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 
 export default async function Home({
   searchParams,
@@ -36,73 +37,85 @@ export default async function Home({
   };
 
   return (
-    <main
-      className="min-h-screen flex items-center justify-center p-4 bg-page-gradient transition-colors duration-500"
-      dir="rtl"
-    >
-      <div className="absolute top-4 left-4">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 md:p-8" dir="rtl">
+      <div className="absolute top-4 left-4 flex items-center gap-2">
         <ThemeToggle />
       </div>
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl text-slate-900 dark:text-white border-slate-200 dark:border-slate-800 transition-all">
-        <CardHeader className="text-center">
-          <div className="mb-4 flex justify-center">
+
+      <div className="w-full max-w-[450px] space-y-8">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="p-3 rounded-2xl bg-muted/50 border border-border shadow-sm mb-2">
             <img 
               src="/logo.jpeg" 
               alt="Jisr Logo" 
-              className="h-24 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] rounded-2xl"
+              className="h-16 w-auto object-contain rounded-lg"
             />
           </div>
-          <CardTitle className="text-3xl font-extrabold bg-gradient-to-l from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-            جسر — محاكي المبيعات
-          </CardTitle>
-          <CardDescription className="text-slate-400 text-base mt-2">
-            تدريب تفاعلي على الاستكشاف ومعالجة الاعتراضات والإغلاق
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isJoining ? (
-            <form action={handleJoin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-slate-300">
-                  اسمك:
-                </label>
-                <Input
-                  name="name"
-                  required
-                  placeholder="أدخل اسمك للانضمام..."
-                  className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-lg font-bold bg-gradient-to-l from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 border-0 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-300"
-              >
-                انضمام للغرفة
-              </Button>
-            </form>
-          ) : (
-            <form action={handleCreate} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-slate-300">
-                  اسم المدرب (المضيف):
-                </label>
-                <Input
-                  name="name"
-                  required
-                  placeholder="أدخل اسمك..."
-                  className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-lg font-bold bg-gradient-to-l from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 border-0 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-300"
-              >
-                🚀 إنشاء غرفة تدريب جديدة
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight">
+              جسر — محاكي المبيعات
+            </h1>
+            <p className="text-muted-foreground text-lg max-w-[400px]">
+              منصة تفاعلية متطورة للتدريب على مهارات الاستكشاف، معالجة الاعتراضات، وإغلاق الصفقات.
+            </p>
+          </div>
+        </div>
+
+        <Card className="border shadow-lg bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-xl">
+              {isJoining ? 'الانضمام إلى الجلسة' : 'بدء جلسة جديدة'}
+            </CardTitle>
+            <CardDescription>
+              {isJoining 
+                ? 'أدخل اسمك للانضمام إلى جلسة التدريب الحالية.' 
+                : 'أنشئ غرفة تدريب جديدة وادعُ فريقك للمشاركة.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isJoining ? (
+              <form action={handleJoin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">اسم المشارك</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    placeholder="أدخل اسمك..."
+                    className="h-11"
+                  />
+                </div>
+                <Button type="submit" className="w-full h-11 text-base font-semibold">
+                  انضمام للغرفة
+                </Button>
+              </form>
+            ) : (
+              <form action={handleCreate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="host-name">اسم المدرب (المضيف)</Label>
+                  <Input
+                    id="host-name"
+                    name="name"
+                    required
+                    placeholder="أدخل اسمك..."
+                    className="h-11"
+                  />
+                </div>
+                <Button type="submit" className="w-full h-11 text-base font-semibold">
+                  🚀 إنشاء غرفة تدريب
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+        
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">
+            &copy; {new Date().getFullYear()} جسر للتدريب المتقدم. جميع الحقوق محفوظة.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
+

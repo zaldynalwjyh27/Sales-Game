@@ -9,26 +9,23 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
-  // Prevent hydration mismatch
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted) return <div className="h-9 w-9" />;
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="rounded-full bg-white/5 dark:bg-white/10 border-slate-200 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-900 dark:text-white transition-all shadow-sm"
+      className="h-9 w-9 rounded-md"
     >
-      {theme === 'dark' ? (
-        <Sun className="h-5 w-5 text-yellow-400 transition-all" />
-      ) : (
-        <Moon className="h-5 w-5 text-blue-400 transition-all" />
-      )}
+      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       <span className="sr-only">تبديل المظهر</span>
     </Button>
   );
 }
+

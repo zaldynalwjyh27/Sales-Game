@@ -1,7 +1,10 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { BUYER_PERSONAS, JISR_SCENARIOS } from '@/lib/jisr-constants';
+import { FileText, Target, BarChart3, AlertCircle, HelpCircle, Info } from 'lucide-react';
 
 interface RoleCardProps {
   role: string | null;
@@ -16,63 +19,121 @@ export function RoleCardDisplay({ role, scenarioId }: RoleCardProps) {
 
   if (!scenario || !persona) return null;
 
+  const getRoleIcon = () => {
+    switch (role) {
+      case 'CLIENT': return <FileText className="h-5 w-5" />;
+      case 'SELLER': return <Target className="h-5 w-5" />;
+      case 'EVALUATOR': return <BarChart3 className="h-5 w-5" />;
+      default: return null;
+    }
+  };
+
+  const getRoleLabel = () => {
+    switch (role) {
+      case 'CLIENT': return 'بطاقة العميل';
+      case 'SELLER': return 'بطاقة البائع';
+      case 'EVALUATOR': return 'بطاقة المراقب';
+      default: return '';
+    }
+  };
+
   return (
-    <Card className="w-full mb-4 rtl shadow-sm border-r-4 border-r-blue-600 bg-slate-50 dark:bg-slate-900">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold text-right text-blue-800 dark:text-blue-300">
-          {role === 'CLIENT' && "📜 بطاقة العميل (دورك)"}
-          {role === 'SELLER' && "🎯 بطاقة البائع (دورك)"}
-          {role === 'EVALUATOR' && "📊 المراقب (دورك)"}
-        </CardTitle>
+    <Card className="w-full border shadow-sm" dir="rtl">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between mb-2">
+          <Badge variant="secondary" className="gap-1.5 py-1 px-3">
+            {getRoleIcon()}
+            {getRoleLabel()}
+          </Badge>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">سرّي للمشارك</span>
+        </div>
+        <CardTitle className="text-xl font-bold">{scenario.title}</CardTitle>
+        <CardDescription className="text-sm leading-relaxed">{scenario.description}</CardDescription>
       </CardHeader>
-      <CardContent className="text-right space-y-4" dir="rtl">
-        <div className="p-4 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-100 dark:border-slate-700">
-          <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-200 mb-2">{scenario.title}</h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{scenario.description}</p>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-            <div>
-              <span className="block font-semibold text-slate-700 dark:text-slate-300">الشخصية:</span>
-              <span>{persona.name}</span>
-            </div>
-            <div>
-              <span className="block font-semibold text-slate-700 dark:text-slate-300">المنافس:</span>
-              <span>{scenario.competitor}</span>
-            </div>
+      
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 gap-4 py-3 px-4 rounded-xl bg-muted/30 border border-border/50">
+          <div className="space-y-1">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase">الشخصية</span>
+            <p className="text-sm font-semibold">{persona.name}</p>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase">المنافس</span>
+            <p className="text-sm font-semibold">{scenario.competitor}</p>
           </div>
         </div>
 
+        <Separator />
+
         {role === 'CLIENT' && (
-          <div className="space-y-3">
-            <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded border border-red-100 dark:border-red-900">
-              <span className="font-bold text-red-800 dark:text-red-400">الاعتراض الأولي:</span>
-              <p className="text-sm mt-1 text-red-700 dark:text-red-300">"{scenario.initialObjection}"</p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-destructive font-bold text-sm">
+                <AlertCircle className="h-4 w-4" />
+                الاعتراض الأولي:
+              </div>
+              <p className="text-sm p-3 rounded-lg bg-destructive/5 border border-destructive/10 italic leading-relaxed text-destructive/80">
+                "{scenario.initialObjection}"
+              </p>
             </div>
-            <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded border border-amber-100 dark:border-amber-900">
-              <span className="font-bold text-amber-800 dark:text-amber-400">الألم الخفي (لا تكشفه إلا إذا سُئلت السؤال المناسب!):</span>
-              <p className="text-sm mt-1 text-amber-700 dark:text-amber-300">"{scenario.hiddenPain}"</p>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-amber-600 font-bold text-sm">
+                <HelpCircle className="h-4 w-4" />
+                الألم الخفي (لا تكشفه إلا إذا سُئلت):
+              </div>
+              <p className="text-sm p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 italic leading-relaxed text-amber-700/80">
+                "{scenario.hiddenPain}"
+              </p>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded border border-blue-100 dark:border-blue-900">
-              <span className="font-bold text-blue-800 dark:text-blue-400">السؤال الذي يفتح الألم:</span>
-              <p className="text-sm mt-1 text-blue-700 dark:text-blue-300">"{scenario.triggerQuestion}"</p>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                <Info className="h-4 w-4" />
+                السؤال المفتاحي:
+              </div>
+              <p className="text-sm p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 italic leading-relaxed text-blue-700/80">
+                "{scenario.triggerQuestion}"
+              </p>
             </div>
           </div>
         )}
 
         {role === 'SELLER' && (
-          <div className="space-y-3">
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded border border-emerald-100 dark:border-emerald-900">
-              <span className="font-bold text-emerald-800 dark:text-emerald-400">أهدافك:</span>
-              <ul className="list-disc list-inside text-sm mt-2 text-emerald-700 dark:text-emerald-300 space-y-1">
-                <li>افتح المحادثة بسؤال قوي يجعله يتحدث.</li>
-                <li>اكتشف الألم الخفي الذي يخص هذه الشخصية ({persona.name}).</li>
-                <li>اعترف باعتراضاته قبل الرد عليها.</li>
-                <li>اخلق إلحاحاً طبيعياً وأغلق بخطوة تالية.</li>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                <Target className="h-4 w-4" />
+                أهدافك في هذه الجولة:
+              </div>
+              <ul className="space-y-2">
+                {[
+                  'افتح المحادثة بسؤال قوي يجعله يتحدث.',
+                  `اكتشف الألم الخفي الذي يخص هذه الشخصية (${persona.name}).`,
+                  'اعترف باعتراضاته بذكاء قبل الرد عليها.',
+                  'اخلق إلحاحاً طبيعياً وأغلق بخطوة تالية واضحة.'
+                ].map((goal, i) => (
+                  <li key={i} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                      {i + 1}
+                    </span>
+                    {goal}
+                  </li>
+                ))}
               </ul>
             </div>
+          </div>
+        )}
+
+        {role === 'EVALUATOR' && (
+          <div className="space-y-4 text-center py-6 border border-dashed rounded-2xl bg-muted/20">
+            <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground opacity-50 mb-2" />
+            <p className="text-sm font-medium">أنت في وضع المراقبة</p>
+            <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">قم بتقييم أداء البائع بناءً على ردود أفعال العميل وجودة الأسئلة.</p>
           </div>
         )}
       </CardContent>
     </Card>
   );
 }
+

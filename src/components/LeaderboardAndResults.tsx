@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JISR_EVALUATION_CRITERIA } from '@/lib/jisr-constants';
+import { Trophy, ListChecks, Star, User, Hash, Award } from 'lucide-react';
 
 interface PlayerScore {
   playerId: string;
@@ -22,7 +24,7 @@ interface Evaluation {
   target?: {
     name: string;
   };
-  scores: string; // JSON string of scores
+  scores: string;
   notes?: string;
   targetId: string;
   roundNumber: number;
@@ -31,7 +33,7 @@ interface Evaluation {
 interface LeaderboardAndResultsProps {
   roomId: string;
   evaluations: Evaluation[];
-  players: any[]; // Player data from the room
+  players: any[];
   currentRound: number;
 }
 
@@ -42,17 +44,14 @@ export function LeaderboardAndResults({
   currentRound 
 }: LeaderboardAndResultsProps) {
   const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
-  const [activeTab, setActiveTab] = useState<'leaderboard' | 'evaluations'>('leaderboard');
   
   useEffect(() => {
-    // Process evaluations to calculate player scores
     const scoreMap: Record<string, { total: number, count: number, playerName: string }> = {};
     
     evaluations.forEach(evaluation => {
       const scoresObj = JSON.parse(evaluation.scores) as Record<number, number>;
       const totalScore = Object.values(scoresObj).reduce((sum, score) => sum + score, 0);
       
-      // Find the target player from the room
       const targetPlayer = players.find(p => p.id === evaluation.targetId);
       if (targetPlayer) {
         if (!scoreMap[targetPlayer.id]) {
@@ -62,7 +61,6 @@ export function LeaderboardAndResults({
             playerName: targetPlayer.name
           };
         }
-        
         scoreMap[targetPlayer.id].total += totalScore;
         scoreMap[targetPlayer.id].count += 1;
       }
@@ -76,83 +74,74 @@ export function LeaderboardAndResults({
       averageScore: parseFloat((data.total / data.count).toFixed(2))
     }));
     
-    // Sort by average score descending
     calculatedScores.sort((a, b) => b.averageScore - a.averageScore);
-    
     setPlayerScores(calculatedScores);
   }, [evaluations, players]);
 
   return (
-    <div className="w-full space-y-6">
-      <Card className="bg-white/[0.04] backdrop-blur-xl border-slate-700/50 text-white">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl font-bold bg-gradient-to-l from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-            لوحة النتائج وتصنيف الأداء
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex border-b border-slate-700 mb-4">
-            <Button
-              variant="ghost"
-              className={`mr-2 ${activeTab === 'leaderboard' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400'}`}
-              onClick={() => setActiveTab('leaderboard')}
-            >
-              لائحة المتصدرين
-            </Button>
-            <Button
-              variant="ghost"
-              className={`${activeTab === 'evaluations' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400'}`}
-              onClick={() => setActiveTab('evaluations')}
-            >
-              تفاصيل التقييمات
-            </Button>
-          </div>
-          
-          {activeTab === 'leaderboard' ? (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-slate-200">أداء البائعين عبر الجولات ({currentRound})</h3>
-              
+    <div className="w-full space-y-6" dir="rtl">
+      <Tabs defaultValue="leaderboard" className="w-full">
+        <TabsList className="grid w-full max-w-[400px] grid-cols-2 mx-auto mb-8">
+          <TabsTrigger value="leaderboard" className="gap-2">
+            <Trophy className="h-4 w-4" />
+            المتصدرون
+          </TabsTrigger>
+          <TabsTrigger value="evaluations" className="gap-2">
+            <ListChecks className="h-4 w-4" />
+            التفاصيل
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="leaderboard">
+          <Card className="border shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                تصنيف أداء المشاركين
+              </CardTitle>
+              <CardDescription>بناءً على متوسط التقييمات عبر الجولات الماضية.</CardDescription>
+            </CardHeader>
+            <CardContent>
               {playerScores.length > 0 ? (
-                <ScrollArea className="h-[450px] pr-2">
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block">
+                <div className="space-y-4">
+                  {/* Desktop View */}
+                  <div className="hidden md:block overflow-hidden rounded-lg border">
                     <table className="w-full text-right border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-700">
-                          <th className="py-3 px-3 text-slate-300 font-bold">#</th>
-                          <th className="py-3 px-3 text-slate-300 font-bold">الاسم</th>
-                          <th className="py-3 px-3 text-slate-300 font-bold text-center">الجولات</th>
-                          <th className="py-3 px-3 text-slate-300 font-bold text-center">المجموع</th>
-                          <th className="py-3 px-3 text-slate-300 font-bold text-center">المعدل النهائي</th>
+                        <tr className="bg-muted/50 border-b">
+                          <th className="py-3 px-4 font-bold text-muted-foreground text-xs uppercase tracking-wider"><Hash className="h-3 w-3 inline mr-1" /> المركز</th>
+                          <th className="py-3 px-4 font-bold text-muted-foreground text-xs uppercase tracking-wider"><User className="h-3 w-3 inline mr-1" /> الاسم</th>
+                          <th className="py-3 px-4 font-bold text-muted-foreground text-xs uppercase tracking-wider text-center">الجولات</th>
+                          <th className="py-3 px-4 font-bold text-muted-foreground text-xs uppercase tracking-wider text-center">المعدل</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y">
                         {playerScores.map((player, index) => (
-                          <tr key={player.playerId} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                            <td className="py-4 px-3">
-                              <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
-                                index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                                index === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' :
-                                index === 2 ? 'bg-amber-600/20 text-amber-500 border border-amber-600/30' :
-                                'bg-slate-700/50 text-slate-300'
-                              }`}>
-                                {index + 1}
-                              </span>
+                          <tr key={player.playerId} className="hover:bg-muted/30 transition-colors">
+                            <td className="py-4 px-4">
+                              {index === 0 ? (
+                                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold h-7 w-7 rounded-full p-0 flex items-center justify-center">1</Badge>
+                              ) : index === 1 ? (
+                                <Badge className="bg-slate-400 hover:bg-slate-500 text-white font-bold h-7 w-7 rounded-full p-0 flex items-center justify-center">2</Badge>
+                              ) : index === 2 ? (
+                                <Badge className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-7 w-7 rounded-full p-0 flex items-center justify-center">3</Badge>
+                              ) : (
+                                <span className="text-muted-foreground font-bold mr-2">{index + 1}</span>
+                              )}
                             </td>
-                            <td className="py-4 px-3 font-bold text-lg">{player.playerName}</td>
-                            <td className="py-4 px-3 text-slate-300 text-center font-mono">{player.roundCount}</td>
-                            <td className="py-4 px-3 text-slate-300 text-center font-mono">{player.totalScore.toFixed(1)}</td>
-                            <td className="py-4 px-3">
-                              <div className="flex flex-col items-center justify-center">
-                                <span className="font-black text-2xl text-blue-400">{player.averageScore.toFixed(2)}</span>
-                                <div className="flex mt-1">
+                            <td className="py-4 px-4 font-bold">{player.playerName}</td>
+                            <td className="py-4 px-4 text-center">
+                              <Badge variant="outline" className="font-mono">{player.roundCount}</Badge>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex flex-col items-center">
+                                <span className="text-xl font-black text-primary">{player.averageScore.toFixed(2)}</span>
+                                <div className="flex">
                                   {[...Array(5)].map((_, i) => (
-                                    <span 
+                                    <Star 
                                       key={i} 
-                                      className={`text-sm ${i < Math.floor(player.averageScore) ? 'text-yellow-400' : 'text-slate-700'}`}
-                                    >
-                                      ★
-                                    </span>
+                                      className={`h-2.5 w-2.5 ${i < Math.floor(player.averageScore) ? 'fill-primary text-primary' : 'text-muted'}`}
+                                    />
                                   ))}
                                 </div>
                               </div>
@@ -163,129 +152,98 @@ export function LeaderboardAndResults({
                     </table>
                   </div>
 
-                  {/* Mobile Card View */}
-                  <div className="md:hidden space-y-3 pb-4">
+                  {/* Mobile View */}
+                  <div className="md:hidden space-y-3">
                     {playerScores.map((player, index) => (
-                      <div key={player.playerId} className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl relative overflow-hidden">
-                        <div className={`absolute top-0 right-0 w-1 h-full ${
-                          index === 0 ? 'bg-yellow-500' :
-                          index === 1 ? 'bg-gray-400' :
-                          index === 2 ? 'bg-amber-600' :
-                          'bg-slate-600'
-                        }`} />
-                        
-                        <div className="flex justify-between items-start mb-3">
+                      <div key={player.playerId} className="p-4 rounded-xl border bg-muted/20 relative group">
+                        <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
-                              index === 0 ? 'bg-yellow-500 text-black' :
-                              index === 1 ? 'bg-gray-400 text-black' :
+                            <span className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                              index === 0 ? 'bg-yellow-500 text-white' :
+                              index === 1 ? 'bg-slate-400 text-white' :
                               index === 2 ? 'bg-amber-600 text-white' :
-                              'bg-slate-700 text-slate-300'
+                              'bg-muted text-muted-foreground'
                             }`}>
                               {index + 1}
                             </span>
-                            <h4 className="font-bold text-lg">{player.playerName}</h4>
+                            <h4 className="font-bold">{player.playerName}</h4>
                           </div>
                           <div className="text-left">
-                            <div className="text-2xl font-black text-blue-400 leading-none">
-                              {player.averageScore.toFixed(2)}
-                            </div>
-                            <div className="flex justify-end mt-1">
-                              {[...Array(5)].map((_, i) => (
-                                <span 
-                                  key={i} 
-                                  className={`text-[10px] ${i < Math.floor(player.averageScore) ? 'text-yellow-400' : 'text-slate-700'}`}
-                                >
-                                  ★
-                                </span>
-                              ))}
-                            </div>
+                            <div className="text-lg font-black text-primary">{player.averageScore.toFixed(2)}</div>
                           </div>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-700/50 pt-3">
-                          <div className="text-slate-400">
-                            عدد الجولات: <span className="text-slate-200 font-bold">{player.roundCount}</span>
-                          </div>
-                          <div className="text-slate-400 text-left">
-                            إجمالي النقاط: <span className="text-slate-200 font-bold">{player.totalScore.toFixed(1)}</span>
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground font-bold">
+                          <span>الجولات: {player.roundCount}</span>
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`h-2 w-2 ${i < Math.floor(player.averageScore) ? 'fill-primary text-primary' : 'text-muted'}`} />
+                            ))}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
               ) : (
-                <div className="text-center py-12 text-slate-500 italic bg-slate-800/20 rounded-xl">
-                  لا توجد بيانات تقييمية متاحة حالياً
+                <div className="py-20 text-center text-muted-foreground italic bg-muted/10 rounded-xl border border-dashed">
+                  بانتظار نتائج الجولات...
                 </div>
               )}
-            </div>
-          ) : (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-200 mb-4">تفاصيل التقييمات</h3>
-              
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="evaluations">
+          <ScrollArea className="h-[600px] rounded-md border p-4">
+            <div className="space-y-6">
               {evaluations.length > 0 ? (
-                <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-4">
-                    {evaluations.map((evaluation, index) => {
-                      const scores = JSON.parse(evaluation.scores) as Record<number, number>;
-                      const targetPlayer = players.find((p: any) => p.id === evaluation.targetId);
-                      
-                      return (
-                        <Card key={evaluation.id} className="bg-slate-800/50 border-slate-700">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base text-slate-200">
-                              تقييم من <span className="text-cyan-400">{evaluation.evaluator.name}</span> لـ <span className="text-green-400">{targetPlayer?.name || 'البائع'}</span>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="grid grid-cols-1 gap-3 mb-4">
-                              {JISR_EVALUATION_CRITERIA.map((criterion, idx) => (
-                                <div key={idx} className="flex justify-between items-center p-2 bg-slate-700/30 rounded">
-                                  <span className="text-slate-300 text-sm">{criterion}</span>
-                                  <div className="flex">
-                                    {[...Array(5)].map((_, starIdx) => (
-                                      <span 
-                                        key={starIdx} 
-                                        className={`text-lg ${starIdx < (scores[idx] || 0) ? 'text-yellow-400' : 'text-slate-700'}`}
-                                      >
-                                        ★
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            {evaluation.notes && (
-                              <div className="pt-3 border-t border-slate-700">
-                                <p className="text-slate-400 text-sm"><strong className="text-slate-300">ملاحظات:</strong> {evaluation.notes}</p>
+                evaluations.map((evaluation) => {
+                  const scores = JSON.parse(evaluation.scores) as Record<number, number>;
+                  const targetPlayer = players.find((p: any) => p.id === evaluation.targetId);
+                  
+                  return (
+                    <Card key={evaluation.id} className="border shadow-none bg-muted/20 overflow-hidden">
+                      <CardHeader className="py-3 px-4 border-b bg-muted/30">
+                        <CardTitle className="text-sm">
+                          تقييم <span className="text-primary font-bold">{evaluation.evaluator.name}</span> لـ <span className="font-bold">{targetPlayer?.name || 'لاعب'}</span>
+                        </CardTitle>
+                        <CardDescription className="text-[10px]">الجولة {evaluation.roundNumber}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-4 space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {JISR_EVALUATION_CRITERIA.map((criterion, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-2 bg-background border rounded-lg text-[10px]">
+                              <span className="font-medium">{criterion}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-bold text-primary">{scores[idx] || 0}</span>
+                                <Star className="h-2 w-2 fill-primary text-primary" />
                               </div>
-                            )}
-                            
-                            <div className="mt-3 pt-3 border-t border-slate-700 flex justify-between">
-                              <span className="text-slate-400 text-sm">
-                                المجموع: <span className="font-bold text-yellow-400">
-                                  {Object.values(scores).reduce((sum, score) => sum + score, 0)} / 25
-                                </span>
-                              </span>
                             </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
+                          ))}
+                        </div>
+                        
+                        {evaluation.notes && (
+                          <div className="p-3 rounded-lg bg-background border border-dashed text-xs italic text-muted-foreground">
+                            "{evaluation.notes}"
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-end">
+                          <Badge variant="secondary">
+                            المجموع: {Object.values(scores).reduce((sum, score) => sum + score, 0)} / 25
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
               ) : (
-                <div className="text-center py-8 text-slate-500">
-                  لا توجد تقييمات بعد
-                </div>
+                <div className="py-20 text-center text-muted-foreground italic">لا توجد تقييمات مفصلة بعد.</div>
               )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+}
