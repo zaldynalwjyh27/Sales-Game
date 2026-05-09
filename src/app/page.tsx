@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createRoom, joinRoom } from '@/server/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { HeroClient } from '@/components/HeroClient';
 import {
   Card,
   CardContent,
@@ -37,85 +37,55 @@ export default async function Home({
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 md:p-8" dir="rtl">
-      <div className="absolute top-4 left-4 flex items-center gap-2">
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-[450px] space-y-8">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="p-3 rounded-2xl bg-muted/50 border border-border shadow-sm mb-2">
-            <img 
-              src="/logo.jpeg" 
-              alt="Jisr Logo" 
-              className="h-16 w-auto object-contain rounded-lg"
-            />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight">
-              جسر — محاكي المبيعات
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-[400px]">
-              منصة تفاعلية متطورة للتدريب على مهارات الاستكشاف، معالجة الاعتراضات، وإغلاق الصفقات.
-            </p>
-          </div>
-        </div>
-
-        <Card className="border shadow-lg bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-xl">
-              {isJoining ? 'الانضمام إلى الجلسة' : 'بدء جلسة جديدة'}
-            </CardTitle>
-            <CardDescription>
-              {isJoining 
-                ? 'أدخل اسمك للانضمام إلى جلسة التدريب الحالية.' 
-                : 'أنشئ غرفة تدريب جديدة وادعُ فريقك للمشاركة.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isJoining ? (
-              <form action={handleJoin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">اسم المشارك</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    required
-                    placeholder="أدخل اسمك..."
-                    className="h-11"
-                  />
-                </div>
-                <Button type="submit" className="w-full h-11 text-base font-semibold">
-                  انضمام للغرفة
-                </Button>
-              </form>
-            ) : (
-              <form action={handleCreate} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="host-name">اسم المدرب (المضيف)</Label>
-                  <Input
-                    id="host-name"
-                    name="name"
-                    required
-                    placeholder="أدخل اسمك..."
-                    className="h-11"
-                  />
-                </div>
-                <Button type="submit" className="w-full h-11 text-base font-semibold">
-                  🚀 إنشاء غرفة تدريب
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-        
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} جسر للتدريب المتقدم. جميع الحقوق محفوظة.
-          </p>
-        </div>
-      </div>
-    </div>
+    <HeroClient>
+      <Card className="border shadow-2xl bg-card/80 backdrop-blur-xl border-white/10 dark:border-white/5 rounded-3xl overflow-hidden">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-2xl font-bold">
+            {isJoining ? 'الانضمام إلى الجلسة' : 'بدء جلسة جديدة'}
+          </CardTitle>
+          <CardDescription className="text-sm">
+            {isJoining 
+              ? 'أدخل اسمك للانضمام إلى جلسة التدريب الحالية.' 
+              : 'أنشئ غرفة تدريب جديدة وادعُ فريقك للمشاركة.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {isJoining ? (
+            <form action={handleJoin} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-semibold text-foreground/80">اسم المشارك</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  required
+                  placeholder="أدخل اسمك..."
+                  className="h-12 rounded-xl bg-background/50 border-border/50 focus-visible:ring-primary/50"
+                />
+              </div>
+              <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl shadow-lg hover:shadow-primary/25 transition-all">
+                انضمام للغرفة
+              </Button>
+            </form>
+          ) : (
+            <form action={handleCreate} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="host-name" className="text-sm font-semibold text-foreground/80">اسم المدرب (المضيف)</Label>
+                <Input
+                  id="host-name"
+                  name="name"
+                  required
+                  placeholder="أدخل اسمك..."
+                  className="h-12 rounded-xl bg-background/50 border-border/50 focus-visible:ring-primary/50"
+                />
+              </div>
+              <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl shadow-lg hover:shadow-primary/25 transition-all">
+                🚀 إنشاء غرفة تدريب
+              </Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </HeroClient>
   );
 }
 
