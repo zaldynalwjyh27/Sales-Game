@@ -432,24 +432,26 @@ export function RoomClient({
           </div>
 
           {/* Countdown Timer */}
-          {room.status === 'IN_PROGRESS' && (
+          {(room.status === 'IN_PROGRESS' || room.status === 'FINISHED') && (
             <div className="flex items-center gap-3 mr-4">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-muted/30">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${timeLeft === 0 ? 'border-red-500/30 bg-red-500/10' : 'border-border/50 bg-muted/30'}`}>
                 {timeLeft === 0 ? (
-                  <AlertTriangle className={`h-4 w-4 text-red-500 animate-pulse`} />
+                  <AlertTriangle className="h-4 w-4 text-red-500 animate-pulse" />
                 ) : (
                   <Timer className={`h-4 w-4 ${timerColor}`} />
                 )}
                 <span className={`text-sm font-mono font-bold tabular-nums ${timerColor}`}>
-                  {formatTime(timeLeft)}
+                  {timeLeft === 0 ? 'انتهى الوقت!' : formatTime(timeLeft)}
                 </span>
               </div>
-              <div className="hidden md:block w-24 h-1.5 rounded-full bg-muted overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-1000 ease-linear ${timerBgColor}`}
-                  style={{ width: `${timerProgress}%` }}
-                />
-              </div>
+              {timeLeft > 0 && (
+                <div className="hidden md:block w-24 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ease-linear ${timerBgColor}`}
+                    style={{ width: `${timerProgress}%` }}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
