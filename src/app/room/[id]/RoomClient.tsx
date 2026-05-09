@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPusherClient } from '@/lib/pusher-client';
 import { 
@@ -21,8 +21,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { QUESTION_COUNTS, QUESTION_TYPES } from '@/lib/jisr-constants';
-import { User, ShieldCheck, Users, Settings, LogOut, PlayCircle, RotateCcw, Trash2, Check, Edit2, Share2 } from 'lucide-react';
+import { QUESTION_TYPES } from '@/lib/jisr-constants';
+import { User, ShieldCheck, Users, Settings, LogOut, PlayCircle, RotateCcw, Trash2, Check, Edit2, Share2, Timer, AlertTriangle } from 'lucide-react';
 
 interface Player {
   id: string;
@@ -40,7 +40,7 @@ interface RoomData {
   status: string;
   currentRound: number;
   scenarioId: number | null;
-  questionCount: number;
+
   questionType: string;
   players: Player[];
   evaluations: any[];
@@ -79,8 +79,44 @@ export function RoomClient({
   const [editedName, setEditedName] = useState('');
   const [roomUrl, setRoomUrl] = useState('');
   
-  const [questionCount, setQuestionCount] = useState(initialRoom.questionCount || 5);
   const [questionType, setQuestionType] = useState(initialRoom.questionType || 'MIXED');
+
+  // Timer state (5 minutes = 300 seconds)
+  const TIMER_DURATION = 300;
+  const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Start/reset timer when game status changes to IN_PROGRESS or round changes
+  useEffect(() => {
+    if (room.status === 'IN_PROGRESS') {
+      setTimeLeft(TIMER_DURATION);
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [room.status, room.currentRound]);
+
+  const formatTime = useCallback((seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }, []);
+
+  const timerProgress = (timeLeft / TIMER_DURATION) * 100;
+  const timerColor = timeLeft > 120 ? 'text-green-500' : timeLeft > 60 ? 'text-amber-500' : 'text-red-500';
+  const timerBgColor = timeLeft > 120 ? 'bg-green-500' : timeLeft > 60 ? 'bg-amber-500' : 'bg-red-500';
 
   useEffect(() => {
     const client = getPusherClient();
@@ -167,8 +203,8 @@ export function RoomClient({
     }
     setIsStarting(true);
     try {
-      if (questionCount !== initialRoom.questionCount || questionType !== initialRoom.questionType) {
-        await updateRoomSettings(room.id, questionCount, questionType);
+      if (questionType !== initialRoom.questionType) {
+        await updateRoomSettings(room.id, 5, questionType);
       }
       await assignRandomRoles(room.id);
       window.location.reload();
@@ -322,19 +358,7 @@ export function RoomClient({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>عدد الأسئلة</Label>
-                  <select
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(Number(e.target.value))}
-                    disabled={!currentPlayer.isHost}
-                    className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {QUESTION_COUNTS.map(count => (
-                      <option key={count} value={count}>{count}</option>
-                    ))}
-                  </select>
-                </div>
+
                 <div className="space-y-2">
                   <Label>نوع الأسئلة</Label>
                   <select
@@ -404,9 +428,30 @@ export function RoomClient({
               <Badge variant="outline" className="text-[10px] h-4 py-0">
                 {QUESTION_TYPES[room.questionType as keyof typeof QUESTION_TYPES]?.name || 'مزيج'}
               </Badge>
-              <span>{room.questionCount} أسئلة</span>
             </div>
           </div>
+
+          {/* Countdown Timer */}
+          {room.status === 'IN_PROGRESS' && (
+            <div className="flex items-center gap-3 mr-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-muted/30">
+                {timeLeft === 0 ? (
+                  <AlertTriangle className={`h-4 w-4 text-red-500 animate-pulse`} />
+                ) : (
+                  <Timer className={`h-4 w-4 ${timerColor}`} />
+                )}
+                <span className={`text-sm font-mono font-bold tabular-nums ${timerColor}`}>
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
+              <div className="hidden md:block w-24 h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ease-linear ${timerBgColor}`}
+                  style={{ width: `${timerProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
