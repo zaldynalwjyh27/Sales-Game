@@ -31,8 +31,6 @@ export const QUESTION_TYPES = {
   }
 };
 
-// Question counts for admin settings
-export const QUESTION_COUNTS = [3, 5, 7, 10];
 
 // Buyer personas remain the same
 export const BUYER_PERSONAS = [
