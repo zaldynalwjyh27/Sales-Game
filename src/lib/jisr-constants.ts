@@ -53,6 +53,18 @@ export const BUYER_PERSONAS = [
     name: "مدير العمليات",
     focus: "التحكم في الوردية، تسرب الاوفر تايم، الإنتاجية",
     tone: "سريع، يركز على الكفاءة ومراقبة الدوام في الفروع",
+  },
+  {
+    id: "CEO",
+    name: "الرئيس التنفيذي",
+    focus: "النمو، الرؤية الاستراتيجية، العائد على الاستثمار، التحول الرقمي",
+    tone: "استراتيجي، يهتم بالصورة الكبيرة والأثر على الأعمال",
+  },
+  {
+    id: "IT_MANAGER",
+    name: "مدير تقنية المعلومات",
+    focus: "الأمان، التكامل مع الأنظمة، البنية التحتية، حماية البيانات",
+    tone: "تقني، يركز على الأمان والتكامل والاستقرار التقني",
   }
 ];
 
@@ -60,7 +72,7 @@ export const BUYER_PERSONAS = [
 export const JISR_SCENARIOS = [
   {
     id: 1,
-    title: " confrontation مع ZenHR - مدير موارد بشرية",
+    title: "مواجهة مع ZenHR - مدير موارد بشرية",
     personaId: "HR_MANAGER",
     competitor: "ZenHR",
     description: "شركة بها 300 موظف، يستخدمون ZenHR ويقولون أنه 'مقبول'.",
@@ -71,7 +83,7 @@ export const JISR_SCENARIOS = [
   },
   {
     id: 2,
-    title: " confrontation مع Bayzat - المدير المالي",
+    title: "مواجهة مع Bayzat - المدير المالي",
     personaId: "CFO",
     competitor: "Bayzat",
     description: "المدير المالي يرى أن Bayzat أرخص ومناسب لميززيتهم الحالية.",
@@ -82,7 +94,7 @@ export const JISR_SCENARIOS = [
   },
   {
     id: 3,
-    title: " confrontation مع Odoo - مدير العمليات",
+    title: "مواجهة مع Odoo - مدير العمليات",
     personaId: "OPS_MANAGER",
     competitor: "Odoo",
     description: "مدير عمليات مقتنع بأن Odoo يغطي كل احتياجاتهم.",
@@ -126,7 +138,7 @@ export const JISR_SCENARIOS = [
   },
   {
     id: 7,
-    title: " confrontation مع Palm HR - مدير موارد بشرية",
+    title: "مواجهة مع Palm HR - مدير موارد بشرية",
     personaId: "HR_MANAGER",
     competitor: "Palm HR",
     description: "العميل يفكر في Palm HR لأنه سمع أن أسعاره جيدة.",
@@ -137,7 +149,7 @@ export const JISR_SCENARIOS = [
   },
   {
     id: 8,
-    title: " confrontation مع Menaitech - المدير المالي",
+    title: "مواجهة مع Menaitech - المدير المالي",
     personaId: "CFO",
     competitor: "Menaitech",
     description: "شركة مقاولات بـ 800 موظف، مقيدة مع النظام منذ 3 سنوات.",
@@ -188,7 +200,205 @@ export const JISR_SCENARIOS = [
     hiddenPain: "تأخر حل المشاكل أدى لخطأ في حساب مكافآت العام الماضي.",
     triggerQuestion: "آخر مشكلة واجهتكم في النظام، كم استغرق حلها وما كانت تكلفتها على الشركة؟",
     initialObjection: "نحن ندفع رسوم صيانة سنوية والدعم موجود وإن كان بطيئاً.",
-    questionType: "CLOSING" // Scenario suitable for closing questions
+    questionType: "CLOSING"
+  },
+  {
+    id: 13,
+    title: "التحول الرقمي - الرئيس التنفيذي",
+    personaId: "CEO",
+    competitor: "None",
+    description: "شركة متوسطة (500 موظف) لا تزال تعتمد على الإكسل والأوراق في إدارة الموارد البشرية.",
+    hiddenPain: "فقدوا 3 موظفين أكفاء خلال 6 أشهر بسبب تأخر معالجة طلباتهم وغياب تجربة موظف رقمية.",
+    triggerQuestion: "كيف يشعر موظفوكم تجاه العمليات الإدارية الحالية؟ هل قستم معدل دوران الموظفين مؤخراً؟",
+    initialObjection: "لسنا مستعجلين على التحول الرقمي، الأولوية للمبيعات حالياً.",
+    questionType: "EXPLORATION"
+  },
+  {
+    id: 14,
+    title: "أمان البيانات - مدير تقنية المعلومات",
+    personaId: "IT_MANAGER",
+    competitor: "None",
+    description: "الشركة تخزن بيانات الموظفين على سيرفر محلي قديم وتخشى الانتقال للسحابة.",
+    hiddenPain: "تعرضوا لحادثة فقدان بيانات قبل 4 أشهر بسبب عطل في السيرفر واستغرق الاسترجاع أسبوعاً.",
+    triggerQuestion: "ما هي خطتكم لاستمرارية الأعمال في حال تعطل السيرفر؟ متى آخر مرة اختبرتم النسخ الاحتياطي؟",
+    initialObjection: "السحابة غير آمنة ونفضل الاحتفاظ ببياناتنا محلياً.",
+    questionType: "OBJECTION_HANDLING"
+  },
+  {
+    id: 15,
+    title: "مواجهة مع SAP SuccessFactors - مدير تقنية المعلومات",
+    personaId: "IT_MANAGER",
+    competitor: "SAP SuccessFactors",
+    description: "شركة كبيرة تستخدم SAP ERP وتفكر في SuccessFactors للموارد البشرية.",
+    hiddenPain: "تكلفة ترخيص SuccessFactors عالية جداً وفريقهم التقني لا يملك خبرة كافية لتخصيصه.",
+    triggerQuestion: "كم ميزانية التشغيل السنوية المخصصة لـ SuccessFactors؟ وكم مستشار خارجي تحتاجون؟",
+    initialObjection: "نحن بيئة SAP بالكامل، لا نريد تعقيد البنية التحتية بنظام مختلف.",
+    questionType: "OBJECTION_HANDLING"
+  },
+  {
+    id: 16,
+    title: "التوسع السريع - الرئيس التنفيذي",
+    personaId: "CEO",
+    competitor: "None",
+    description: "شركة ناشئة حصلت على تمويل وستوظف 200 موظف خلال 6 أشهر.",
+    hiddenPain: "عملية التوظيف والتهيئة الحالية يدوية بالكامل وتستغرق 5 أيام لكل موظف جديد.",
+    triggerQuestion: "كم يوماً يستغرق تهيئة الموظف الجديد من التوقيع حتى أول يوم عمل فعلي؟",
+    initialObjection: "سنتعامل مع التوظيف يدوياً الآن ونفكر في نظام لاحقاً بعد الاستقرار.",
+    questionType: "CLOSING"
+  },
+  {
+    id: 17,
+    title: "حماية الأجور WPS - المدير المالي",
+    personaId: "CFO",
+    competitor: "None",
+    description: "شركة مقاولات تواجه صعوبة في الامتثال لنظام حماية الأجور.",
+    hiddenPain: "تلقوا إنذارين من وزارة الموارد البشرية بسبب تأخر رفع ملفات WPS.",
+    triggerQuestion: "كيف تتأكدون أن ملف WPS يتطابق مع التحويلات البنكية كل شهر؟ هل واجهتم أي إنذارات؟",
+    initialObjection: "المحاسب يرفع الملف يدوياً وهذا كافٍ لنا.",
+    questionType: "EXPLORATION"
+  },
+  {
+    id: 18,
+    title: "مواجهة مع DarwinBox - مدير موارد بشرية",
+    personaId: "HR_MANAGER",
+    competitor: "DarwinBox",
+    description: "الشركة تقارن بين جسر و DarwinBox كنظام عالمي.",
+    hiddenPain: "DarwinBox لا يدعم التكامل مع GOSI ومدد وحماية الأجور، مما يتطلب عملاً يدوياً إضافياً.",
+    triggerQuestion: "كيف ستتعاملون مع متطلبات GOSI ومدد وWPS إذا اخترتم نظاماً غير محلي؟",
+    initialObjection: "نريد نظاماً عالمياً لأننا شركة متعددة الجنسيات.",
+    questionType: "OBJECTION_HANDLING"
+  },
+  {
+    id: 19,
+    title: "إدارة الأداء - مدير موارد بشرية",
+    personaId: "HR_MANAGER",
+    competitor: "None",
+    description: "الشركة ليس لديها نظام تقييم أداء رسمي وتعتمد على ملاحظات المدراء الشفهية.",
+    hiddenPain: "3 موظفين رفعوا شكاوى لأن الترقيات تتم بدون معايير واضحة مما أثر على الروح المعنوية.",
+    triggerQuestion: "كيف تحددون من يستحق الترقية أو الزيادة؟ وهل الموظفون يشعرون بالعدالة في ذلك؟",
+    initialObjection: "تقييم الأداء ليس أولوية الآن، نركز على العمليات اليومية.",
+    questionType: "EXPLORATION"
+  },
+  {
+    id: 20,
+    title: "التكامل مع البنوك - المدير المالي",
+    personaId: "CFO",
+    competitor: "None",
+    description: "شركة تدفع رواتب 600 موظف عبر تحويلات بنكية يدوية كل شهر.",
+    hiddenPain: "حدث خطأ في تحويل الرواتب الشهر الماضي وتم تحويل مبالغ مزدوجة لـ 15 موظفاً.",
+    triggerQuestion: "كم خطوة تمر بها عملية تحويل الرواتب من الموافقة حتى وصولها لحساب الموظف؟",
+    initialObjection: "البنك يوفر لنا خدمة تحويل الرواتب مباشرة ولا نحتاج نظاماً إضافياً.",
+    questionType: "CLOSING"
+  },
+  {
+    id: 21,
+    title: "مواجهة مع MenaITech - مدير العمليات",
+    personaId: "OPS_MANAGER",
+    competitor: "Menaitech",
+    description: "شركة صناعية تستخدم MenaITech منذ 5 سنوات وتشتكي من بطء النظام.",
+    hiddenPain: "واجهة المستخدم قديمة والموظفون يرفضون استخدام تطبيق الجوال لتعقيده.",
+    triggerQuestion: "كم نسبة الموظفين الذين يستخدمون تطبيق الجوال فعلياً؟ وما أكثر شكوى تسمعونها؟",
+    initialObjection: "لقد استثمرنا كثيراً في النظام الحالي ولا نريد البدء من الصفر.",
+    questionType: "OBJECTION_HANDLING"
+  },
+  {
+    id: 22,
+    title: "السعودة والتوطين - الرئيس التنفيذي",
+    personaId: "CEO",
+    competitor: "None",
+    description: "شركة تواجه تحديات في تحقيق نسب نطاقات وزارة الموارد البشرية.",
+    hiddenPain: "انتقلوا للنطاق الأصفر الشهر الماضي وتم إيقاف خدمات التأشيرات.",
+    triggerQuestion: "ما نسبة السعودة الحالية لديكم؟ وهل لديكم رؤية واضحة لتوزيع الجنسيات حسب الأقسام؟",
+    initialObjection: "نتابع نسب السعودة عبر موقع الوزارة مباشرة ولا نحتاج نظاماً لذلك.",
+    questionType: "EXPLORATION"
+  },
+  {
+    id: 23,
+    title: "مواجهة مع Gusto - مدير تقنية المعلومات",
+    personaId: "IT_MANAGER",
+    competitor: "Gusto",
+    description: "شركة تقنية تفكر في استخدام Gusto لأن فريقها التقني يفضل الأنظمة الأمريكية.",
+    hiddenPain: "Gusto لا يدعم قوانين العمل السعودية ولا يتكامل مع أي جهة حكومية محلية.",
+    triggerQuestion: "كيف ستتعاملون مع حساب نهاية الخدمة والإجازات وفق نظام العمل السعودي باستخدام نظام أمريكي؟",
+    initialObjection: "فريقنا تقني ويفضل الأنظمة العالمية ذات الـ API المفتوح.",
+    questionType: "OBJECTION_HANDLING"
+  },
+  {
+    id: 24,
+    title: "مكافأة نهاية الخدمة - المدير المالي",
+    personaId: "CFO",
+    competitor: "None",
+    description: "شركة لديها 400 موظف وتحسب مكافآت نهاية الخدمة يدوياً على الإكسل.",
+    hiddenPain: "اكتشفوا خطأ في حساب مكافأة موظف واضطروا لدفع تعويض إضافي بعد شكوى في مكتب العمل.",
+    triggerQuestion: "كيف تتأكدون من دقة حساب مكافأة نهاية الخدمة لكل موظف؟ وهل واجهتم نزاعات بسبب ذلك؟",
+    initialObjection: "المحاسب لدينا خبير ويعرف القانون جيداً، لا نحتاج نظاماً لذلك.",
+    questionType: "CLOSING"
+  },
+  {
+    id: 25,
+    title: "إدارة الإجازات الفوضوية - مدير العمليات",
+    personaId: "OPS_MANAGER",
+    competitor: "None",
+    description: "شركة ضيافة فيها 800 موظف وتعاني من فوضى في جدولة الإجازات خاصة في المواسم.",
+    hiddenPain: "في موسم الحج الماضي تغيب 40% من الموظفين بسبب سوء تنسيق الإجازات وخسروا عقداً كبيراً.",
+    triggerQuestion: "كيف تتعاملون مع طلبات الإجازات في المواسم؟ وهل واجهتم نقصاً مفاجئاً في القوى العاملة؟",
+    initialObjection: "مدراء الأقسام ينسقون الإجازات بينهم عبر الواتساب وهذا يكفي.",
+    questionType: "EXPLORATION"
+  },
+  {
+    id: 26,
+    title: "العائد على الاستثمار - الرئيس التنفيذي",
+    personaId: "CEO",
+    competitor: "None",
+    description: "الرئيس التنفيذي يريد تبريراً مالياً واضحاً قبل الاستثمار في نظام HR.",
+    hiddenPain: "يقضي فريق HR من 4 أشخاص 60% من وقتهم في مهام إدارية يدوية بدلاً من التطوير الاستراتيجي.",
+    triggerQuestion: "كم ساعة أسبوعياً يقضيها فريق HR في مهام يدوية مثل إدخال البيانات والتقارير؟",
+    initialObjection: "لم أرَ عائداً واضحاً على الاستثمار في أنظمة HR سابقاً.",
+    questionType: "CLOSING"
+  },
+  {
+    id: 27,
+    title: "مواجهة مع BambooHR - مدير موارد بشرية",
+    personaId: "HR_MANAGER",
+    competitor: "BambooHR",
+    description: "مدير HR أعجبه عرض BambooHR التجريبي ويريد التعاقد معهم.",
+    hiddenPain: "BambooHR لا يدعم اللغة العربية بشكل كامل ولا يتوافق مع نظام العمل السعودي.",
+    triggerQuestion: "هل جربتم إصدار كشف راتب بالعربي أو حساب إجازة وفق المادة 109 من نظام العمل؟",
+    initialObjection: "BambooHR سهل الاستخدام وتصميمه جميل والتجربة المجانية أعجبتنا.",
+    questionType: "OBJECTION_HANDLING"
+  },
+  {
+    id: 28,
+    title: "تقارير مجلس الإدارة - المدير المالي",
+    personaId: "CFO",
+    competitor: "None",
+    description: "المدير المالي يقضي 3 أيام شهرياً في تجميع تقارير الموارد البشرية لمجلس الإدارة.",
+    hiddenPain: "التقارير تصل متأخرة وغير دقيقة مما أدى لاتخاذ قرارات توظيف خاطئة الربع الماضي.",
+    triggerQuestion: "كم يستغرق تجميع تقرير شامل عن تكاليف القوى العاملة؟ وهل تثقون في دقة الأرقام؟",
+    initialObjection: "لدينا محلل بيانات يستخرج التقارير من الإكسل وهذا يكفي.",
+    questionType: "EXPLORATION"
+  },
+  {
+    id: 29,
+    title: "الامتثال لنظام العمل الجديد - مدير موارد بشرية",
+    personaId: "HR_MANAGER",
+    competitor: "None",
+    description: "صدرت تعديلات جديدة على نظام العمل وHR يحتاج تحديث سياساته.",
+    hiddenPain: "لم يستطيعوا تطبيق التعديلات الأخيرة على ساعات العمل المرنة وتلقوا ملاحظة من التفتيش.",
+    triggerQuestion: "كيف تتابعون التحديثات في نظام العمل؟ وكم يستغرق تطبيق أي تعديل جديد على سياساتكم؟",
+    initialObjection: "نتابع التعديلات عبر المحامي ونحدّث السياسات يدوياً.",
+    questionType: "CLOSING"
+  },
+  {
+    id: 30,
+    title: "تكامل الأنظمة المتعددة - مدير تقنية المعلومات",
+    personaId: "IT_MANAGER",
+    competitor: "None",
+    description: "الشركة تستخدم 5 أنظمة مختلفة (حضور، رواتب، إجازات، توظيف، أداء) غير مترابطة.",
+    hiddenPain: "فريق IT يقضي 20 ساعة أسبوعياً في نقل البيانات يدوياً بين الأنظمة وحدث تضارب في بيانات 50 موظفاً.",
+    triggerQuestion: "كم نظاماً تستخدمون لإدارة الموارد البشرية؟ وكم مرة تحدث أخطاء بسبب عدم تزامن البيانات؟",
+    initialObjection: "كل نظام متخصص في مجاله وهذا أفضل من نظام واحد يفعل كل شيء بشكل متوسط.",
+    questionType: "MIXED"
   }
 ];
 
