@@ -52,7 +52,7 @@ export function PlayerRoleBadge({ role }: { role: string | null }) {
   const config = {
     SELLER: { label: 'بائع', variant: 'default' as const, className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
     CLIENT: { label: 'عميل', variant: 'default' as const, className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-    EVALUATOR: { label: 'مُقيّم', variant: 'default' as const, className: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
+    EVALUATOR: { label: 'مراقب', variant: 'default' as const, className: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
   };
 
   const item = config[role as keyof typeof config];
@@ -500,29 +500,33 @@ export function RoomClient({
               </div>
             </Card>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="p-4 border bg-card/50">
-                <h4 className="text-sm font-bold mb-2 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                  تعليمات البائع
-                </h4>
-                <ul className="text-xs text-muted-foreground space-y-2 list-disc list-inside">
-                  <li>ركز على بناء العلاقة مع العميل.</li>
-                  <li>اسأل أسئلة مفتوحة للاستكشاف.</li>
-                  <li>حاول فهم الاعتراضات قبل الرد عليها.</li>
-                </ul>
-              </Card>
-              <Card className="p-4 border bg-card/50">
-                <h4 className="text-sm font-bold mb-2 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                  تعليمات العميل
-                </h4>
-                <ul className="text-xs text-muted-foreground space-y-2 list-disc list-inside">
-                  <li>كن واقعياً في ردود أفعالك.</li>
-                  <li>قدم اعتراضات منطقية بناءً على السيناريو.</li>
-                  <li>امنح البائع فرصة لتجربة مهاراته.</li>
-                </ul>
-              </Card>
+            <div className={`grid grid-cols-1 ${updatedCurrentPlayer.role === 'EVALUATOR' ? 'md:grid-cols-2' : ''} gap-4`}>
+              {(updatedCurrentPlayer.role === 'SELLER' || updatedCurrentPlayer.role === 'EVALUATOR') && (
+                <Card className="p-4 border bg-card/50">
+                  <h4 className="text-sm font-bold mb-2 flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                    تعليمات البائع
+                  </h4>
+                  <ul className="text-xs text-muted-foreground space-y-2 list-disc list-inside">
+                    <li>ركز على بناء العلاقة مع العميل.</li>
+                    <li>اسأل أسئلة مفتوحة للاستكشاف.</li>
+                    <li>حاول فهم الاعتراضات قبل الرد عليها.</li>
+                  </ul>
+                </Card>
+              )}
+              {(updatedCurrentPlayer.role === 'CLIENT' || updatedCurrentPlayer.role === 'EVALUATOR') && (
+                <Card className="p-4 border bg-card/50">
+                  <h4 className="text-sm font-bold mb-2 flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                    تعليمات العميل
+                  </h4>
+                  <ul className="text-xs text-muted-foreground space-y-2 list-disc list-inside">
+                    <li>كن واقعياً في ردود أفعالك.</li>
+                    <li>قدم اعتراضات منطقية بناءً على السيناريو.</li>
+                    <li>امنح البائع فرصة لتجربة مهاراته.</li>
+                  </ul>
+                </Card>
+              )}
             </div>
           </div>
         </div>
