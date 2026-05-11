@@ -160,25 +160,9 @@ export function RoomClient({
       setRoom(prev => ({ ...prev, status: 'FINISHED' }));
     });
 
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/room/${room.id}?player=${currentPlayer.id}`);
-        if (response.ok) {
-          const freshData = await response.json();
-          setRoom(prev => {
-            if (freshData.players.length !== prev.players.length || freshData.status !== prev.status || freshData.currentRound !== prev.currentRound) {
-              return { ...prev, ...freshData };
-            }
-            return prev;
-          });
-        }
-      } catch (e) {}
-    }, 5000);
-
     return () => {
       channel.unbind_all();
       client.unsubscribe(`room-${room.id}`);
-      clearInterval(pollInterval);
     };
   }, [room.id]);
 
