@@ -91,6 +91,8 @@ export function RoomClient({
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [pusherState, setPusherState] = useState<string>('connecting');
+
   // Start/reset timer when game status changes to IN_PROGRESS or round changes
   useEffect(() => {
     if (room.status === 'IN_PROGRESS') {
@@ -125,6 +127,11 @@ export function RoomClient({
 
   useEffect(() => {
     const client = getPusherClient();
+    
+    client.connection.bind('state_change', (states: any) => {
+      setPusherState(states.current);
+    });
+
     const channel = client.subscribe(`room-${room.id}`);
 
     channel.bind('player-joined', (newPlayer: Player) => {
@@ -166,8 +173,10 @@ export function RoomClient({
     });
 
     return () => {
+      client.connection.unbind_all();
       channel.unbind_all();
       client.unsubscribe(`room-${room.id}`);
+      client.disconnect();
     };
   }, [room.id]);
 
@@ -449,7 +458,7 @@ export function RoomClient({
 
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <div className={`h-2 w-2 rounded-full ${pusherState === 'connected' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} title={`Pusher: ${pusherState}`} />
             <span className="text-xs font-medium">أنت: {currentPlayer.name}</span>
             <Separator orientation="vertical" className="h-3" />
             <PlayerRoleBadge role={updatedCurrentPlayer.role} />
