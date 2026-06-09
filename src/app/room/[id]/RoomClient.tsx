@@ -197,6 +197,7 @@ export function RoomClient({
       }
       await assignRandomRoles(room.id);
       router.refresh();
+      setIsStarting(false);
     } catch (e) {
       alert(e instanceof Error ? e.message : 'حدث خطأ أثناء بدء الجلسة');
       setIsStarting(false);
@@ -209,6 +210,7 @@ export function RoomClient({
     try {
       await assignRandomRoles(room.id);
       router.refresh();
+      setIsStarting(false);
     } catch (e) {
       alert(e instanceof Error ? e.message : 'حدث خطأ أثناء إعادة توزيع الأدوار');
       setIsStarting(false);
