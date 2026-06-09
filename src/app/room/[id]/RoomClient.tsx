@@ -74,6 +74,11 @@ export function RoomClient({
 }) {
   const [room, setRoom] = useState<RoomData>(initialRoom);
   const router = useRouter();
+
+  useEffect(() => {
+    setRoom(initialRoom);
+  }, [initialRoom]);
+
   const [isStarting, setIsStarting] = useState(false);
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
@@ -141,14 +146,14 @@ export function RoomClient({
     });
 
     channel.bind('evaluations-revealed', () => {
-      window.location.reload();
+      router.refresh();
     });
 
     channel.bind('next-round', (data: RoomData) => {
       if (data && data.players) {
         setRoom(prev => ({ ...prev, ...data, evaluations: prev.evaluations }));
       } else {
-        window.location.reload();
+        router.refresh();
       }
     });
 
@@ -191,7 +196,7 @@ export function RoomClient({
         await updateRoomSettings(room.id, 5, questionType);
       }
       await assignRandomRoles(room.id);
-      window.location.reload();
+      router.refresh();
     } catch (e) {
       alert(e instanceof Error ? e.message : 'حدث خطأ أثناء بدء الجلسة');
       setIsStarting(false);
@@ -203,7 +208,7 @@ export function RoomClient({
     setIsStarting(true);
     try {
       await assignRandomRoles(room.id);
-      window.location.reload();
+      router.refresh();
     } catch (e) {
       alert(e instanceof Error ? e.message : 'حدث خطأ أثناء إعادة توزيع الأدوار');
       setIsStarting(false);
@@ -229,7 +234,7 @@ export function RoomClient({
     try {
       await updatePlayerName(room.id, playerId, editedName.trim());
       setEditingPlayerId(null);
-      window.location.reload();
+      router.refresh();
     } catch (e) {
       alert(e instanceof Error ? e.message : 'حدث خطأ أثناء تحديث الاسم');
     }
@@ -470,8 +475,8 @@ export function RoomClient({
               </div>
             </div>
             {currentPlayer.isHost && (
-              <Button onClick={() => window.location.reload()} size="sm" variant="outline" className="border-green-600/30 text-green-700 hover:bg-green-600/10">
-                بدء جلسة جديدة
+              <Button onClick={() => router.refresh()} size="sm" variant="outline" className="border-green-600/30 text-green-700 hover:bg-green-600/10">
+                تحديث الجلسة
               </Button>
             )}
           </div>
