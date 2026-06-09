@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createRoom, joinRoom } from '@/server/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SubmitButton } from '@/components/SubmitButton';
 import { HeroClient } from '@/components/HeroClient';
 import {
   Card,
@@ -62,9 +63,9 @@ export default async function Home({
                   className="h-12 rounded-xl bg-background/50 border-border/50 focus-visible:ring-primary/50"
                 />
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl shadow-lg hover:shadow-primary/25 transition-all">
+              <SubmitButton>
                 انضمام للغرفة
-              </Button>
+              </SubmitButton>
             </form>
           ) : (
             <form action={handleCreate} className="space-y-5">
@@ -78,9 +79,9 @@ export default async function Home({
                   className="h-12 rounded-xl bg-background/50 border-border/50 focus-visible:ring-primary/50"
                 />
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl shadow-lg hover:shadow-primary/25 transition-all">
+              <SubmitButton>
                 🚀 إنشاء غرفة تدريب
-              </Button>
+              </SubmitButton>
             </form>
           )}
         </CardContent>

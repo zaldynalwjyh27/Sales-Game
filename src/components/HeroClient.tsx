@@ -21,7 +21,7 @@ export function HeroClient({ children }: { children: ReactNode }) {
         <motion.div 
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="flex flex-col items-center text-center space-y-6"
         >
           <motion.div 
@@ -47,7 +47,7 @@ export function HeroClient({ children }: { children: ReactNode }) {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
         >
           {children}
         </motion.div>
@@ -55,7 +55,7 @@ export function HeroClient({ children }: { children: ReactNode }) {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="text-center mt-8"
         >
           <p className="text-xs text-muted-foreground/60 font-medium">
