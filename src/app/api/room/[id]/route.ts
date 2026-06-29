@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -12,6 +14,7 @@ export async function GET(
       where: { id },
       include: {
         players: true,
+        messages: { include: { sender: true }, orderBy: { createdAt: 'asc' } },
         evaluations: { include: { evaluator: true, target: true } },
       },
     });

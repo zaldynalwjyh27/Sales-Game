@@ -15,6 +15,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { RoleCardDisplay } from '@/components/RoleCardDisplay';
 import { HiddenEvaluatorForm } from '@/components/HiddenEvaluatorForm';
 import { ResultsRevealModal } from '@/components/ResultsRevealModal';
+import { ChatInterface } from '@/components/ChatInterface';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,7 @@ interface RoomData {
   questionType: string;
   players: Player[];
   evaluations: any[];
+  messages?: any[];
 }
 
 export function PlayerRoleBadge({ role }: { role: string | null }) {
@@ -164,6 +166,18 @@ export function RoomClient({
       }
     });
 
+    channel.bind('evaluation-submitted', async (data: { evaluatorId: string }) => {
+      try {
+        const res = await fetch(`/api/room/${room.id}?player=${currentPlayer.id}`);
+        if (res.ok) {
+          const freshRoom = await res.json();
+          setRoom(freshRoom);
+        }
+      } catch (err) {
+        console.error("Failed to fetch fresh room state:", err);
+      }
+    });
+
     channel.bind('room-closed', () => {
       setRoom(prev => ({ ...prev, status: 'CLOSED' }));
     });
@@ -176,9 +190,37 @@ export function RoomClient({
       client.connection.unbind_all();
       channel.unbind_all();
       client.unsubscribe(`room-${room.id}`);
-      client.disconnect();
     };
-  }, [room.id]);
+  }, [room.id, currentPlayer.id]);
+
+  // Polling fallback when Pusher is not connected
+  useEffect(() => {
+    if (pusherState === 'connected') return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/room/${room.id}?player=${currentPlayer.id}`);
+        if (res.ok) {
+          const freshRoom = await res.json();
+          setRoom(prev => {
+            const isDifferent = 
+              prev.status !== freshRoom.status ||
+              prev.currentRound !== freshRoom.currentRound ||
+              prev.scenarioId !== freshRoom.scenarioId ||
+              JSON.stringify(prev.players) !== JSON.stringify(freshRoom.players) ||
+              JSON.stringify(prev.evaluations) !== JSON.stringify(freshRoom.evaluations) ||
+              JSON.stringify(prev.messages) !== JSON.stringify(freshRoom.messages);
+            
+            return isDifferent ? freshRoom : prev;
+          });
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [pusherState, room.id, currentPlayer.id]);
 
   useEffect(() => {
     if (room.status === 'CLOSED') {
@@ -511,6 +553,54 @@ export function RoomClient({
               scenarioId={room.scenarioId}
             />
 
+            {/* Participants Evaluation Progress Card */}
+            <Card className="border shadow-sm">
+              <CardHeader className="py-3 px-4 border-b">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  حالة المشاركين في الجولة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <div className="space-y-2">
+                  {room.players.map((p) => {
+                    const isSeller = p.role === 'SELLER';
+                    const isClient = p.role === 'CLIENT';
+                    const isEvaluator = p.role === 'EVALUATOR';
+                    
+                    const hasSubmittedEval = room.evaluations?.some(
+                      (e: any) => e.evaluatorId === p.id && e.roundNumber === room.currentRound
+                    );
+
+                    return (
+                      <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/20 border border-border/40 text-xs font-semibold">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold">{p.name}</span>
+                          <PlayerRoleBadge role={p.role} />
+                          {p.id === currentPlayer.id && <Badge variant="secondary" className="text-[9px] h-4 py-0">أنت</Badge>}
+                        </div>
+                        <div>
+                          {isSeller && (
+                            <Badge variant="outline" className="bg-blue-500/5 text-blue-600 border-blue-500/10">بائع الجولة</Badge>
+                          )}
+                          {isClient && (
+                            <Badge variant="outline" className="bg-amber-500/5 text-amber-600 border-amber-500/10">عميل الجولة</Badge>
+                          )}
+                          {isEvaluator && (
+                            hasSubmittedEval ? (
+                              <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 font-bold">✓ تم التقييم</Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-muted text-muted-foreground border-border animate-pulse">جاري التقييم...</Badge>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
             {updatedCurrentPlayer.role === 'EVALUATOR' && room.status === 'IN_PROGRESS' && (
               <HiddenEvaluatorForm
                 key={`eval-form-${room.id}-${room.currentRound}`}
@@ -525,27 +615,13 @@ export function RoomClient({
 
           {/* Main Area */}
           <div className="lg:col-span-7 space-y-6">
-            <Card className="border-0 shadow-none bg-muted/20 flex flex-col items-center justify-center min-h-[400px] text-center p-8 rounded-3xl border border-dashed border-border/50">
-              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <User className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">المحادثة وجهاً لوجه</h3>
-              <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                هذه الجولة مخصصة للتفاعل المباشر بين البائع والعميل. المقيمون يتابعون الأداء ويقومون بالتقييم عبر النموذج الجانبي.
-              </p>
-              <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm">
-                <div className="p-4 rounded-2xl bg-card border border-border shadow-sm flex flex-col items-center">
-                  <Badge variant="outline" className="mb-2 text-blue-500 border-blue-500/20 bg-blue-500/5">البائع</Badge>
-                  <span className="font-bold text-lg">{targetPlayer?.name || '...'}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-card border border-border shadow-sm flex flex-col items-center">
-                  <Badge variant="outline" className="mb-2 text-amber-500 border-amber-500/20 bg-amber-500/5">العميل</Badge>
-                  <span className="font-bold text-lg">
-                    {room.players.find(p => p.role === 'CLIENT')?.name || '...'}
-                  </span>
-                </div>
-              </div>
-            </Card>
+            <ChatInterface
+              key={`chat-${room.id}-${room.currentRound}`}
+              roomId={room.id}
+              playerId={currentPlayer.id}
+              initialMessages={room.messages || []}
+              role={updatedCurrentPlayer.role}
+            />
             
             <div className={`grid grid-cols-1 ${updatedCurrentPlayer.role === 'EVALUATOR' ? 'md:grid-cols-2' : ''} gap-4`}>
               {(updatedCurrentPlayer.role === 'SELLER' || updatedCurrentPlayer.role === 'EVALUATOR') && (

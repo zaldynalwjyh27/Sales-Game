@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { RoomClient } from './RoomClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function RoomPage({
   params,
   searchParams,
@@ -31,6 +33,7 @@ export default async function RoomPage({
     where: { id: roomId },
     include: {
       players: true,
+      messages: { include: { sender: true }, orderBy: { createdAt: 'asc' } },
       evaluations: { include: { evaluator: true, target: true } },
     },
   });

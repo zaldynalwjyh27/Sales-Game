@@ -35,6 +35,11 @@ export function ChatInterface({
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Sync messages state when initialMessages prop changes (e.g. via polling)
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
   useEffect(() => {
     const client = getPusherClient();
     const channel = client.subscribe(`room-${roomId}`);
