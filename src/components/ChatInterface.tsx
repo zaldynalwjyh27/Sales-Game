@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getPusherClient } from '@/lib/pusher-client';
+import { bindChannel } from '@/lib/pusher-client';
 import { sendMessage } from '@/server/actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -41,24 +41,23 @@ export function ChatInterface({
   }, [initialMessages]);
 
   useEffect(() => {
-    const client = getPusherClient();
-    const channel = client.subscribe(`room-${roomId}`);
-
-    channel.bind('new-message', (newMessage: Message) => {
+    const handleNewMessage = (newMessage: Message) => {
       setMessages((prev) => {
         if (prev.find((m) => m.id === newMessage.id)) return prev;
         return [...prev, newMessage];
       });
-    });
-
-    channel.bind('next-round', () => {
-      setMessages([]);
-    });
-
-    return () => {
-      channel.unbind_all();
-      client.unsubscribe(`room-${roomId}`);
     };
+
+    const handleNextRound = () => {
+      setMessages([]);
+    };
+
+    // bindChannel never calls unsubscribe — safe to use alongside RoomClient
+    // which subscribes to the same channel for player/game events
+    return bindChannel(`room-${roomId}`, {
+      'new-message': handleNewMessage,
+      'next-round':  handleNextRound,
+    });
   }, [roomId]);
 
   useEffect(() => {
