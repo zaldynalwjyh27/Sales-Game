@@ -327,6 +327,11 @@ export function RoomClient({
     alert('تم نسخ رابط الانضمام');
   };
 
+  console.log('hh', isStarting || room.players.length < 2);
+  console.log('isStarting', isStarting);
+  console.log('room.players.length', room.players.length < 2);
+
+
   // ─── LOBBY VIEW ──────────────────────────────────────────
   if (room.status === 'LOBBY') {
     return (
