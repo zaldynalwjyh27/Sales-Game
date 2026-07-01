@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPusherClient } from '@/lib/pusher-client';
-import { 
-  assignRandomRoles, 
-  updateRoomSettings, 
-  removePlayer, 
-  updatePlayerName, 
-  revealEvaluations, 
-  resetRoomToLobby 
+import { getPusherClient, bindChannel } from '@/lib/pusher-client';
+import {
+  assignRandomRoles,
+  updateRoomSettings,
+  removePlayer,
+  updatePlayerName,
+  revealEvaluations,
+  resetRoomToLobby
 } from '@/server/actions';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { RoleCardDisplay } from '@/components/RoleCardDisplay';
@@ -50,7 +50,7 @@ interface RoomData {
 
 export function PlayerRoleBadge({ role }: { role: string | null }) {
   if (!role) return null;
-  
+
   const config = {
     SELLER: { label: 'بائع', variant: 'default' as const, className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
     CLIENT: { label: 'عميل', variant: 'default' as const, className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
@@ -85,7 +85,7 @@ export function RoomClient({
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
   const [roomUrl, setRoomUrl] = useState('');
-  
+
   const [questionType, setQuestionType] = useState(initialRoom.questionType || 'MIXED');
 
   // Timer state (5 minutes = 300 seconds)
@@ -128,45 +128,54 @@ export function RoomClient({
   const timerBgColor = timeLeft > 120 ? 'bg-green-500' : timeLeft > 60 ? 'bg-amber-500' : 'bg-red-500';
 
   useEffect(() => {
+    // Track Pusher connection state for the polling fallback indicator
     const client = getPusherClient();
-    
-    client.connection.bind('state_change', (states: any) => {
-      setPusherState(states.current);
-    });
+    const onStateChange = (states: any) => setPusherState(states.current);
+    client.connection.bind('state_change', onStateChange);
 
-    const channel = client.subscribe(`room-${room.id}`);
-
-    channel.bind('player-joined', (newPlayer: Player) => {
+    // Use bindChannel so cleanup NEVER calls unsubscribe on the shared channel.
+    // ChatInterface subscribes to the same channel — unsubscribing here would
+    // silently kill its bindings too, breaking all real-time updates.
+    const handlePlayerJoined = (newPlayer: Player) => {
       setRoom((prev) => {
         if (prev.players.find((p) => p.id === newPlayer.id)) return prev;
         return { ...prev, players: [...prev.players, newPlayer] };
       });
-    });
+    };
 
-    channel.bind('player-left', (data: { playerId: string }) => {
+    const handlePlayerLeft = (data: { playerId: string }) => {
       setRoom(prev => ({
         ...prev,
         players: prev.players.filter(p => p.id !== data.playerId)
       }));
-    });
+    };
 
-    channel.bind('game-started', (updatedRoom: RoomData) => {
+    const handlePlayerNameUpdated = (data: { playerId: string; name: string }) => {
+      setRoom(prev => ({
+        ...prev,
+        players: prev.players.map(p =>
+          p.id === data.playerId ? { ...p, name: data.name } : p
+        ),
+      }));
+    };
+
+    const handleGameStarted = (updatedRoom: RoomData) => {
       setRoom((prev) => ({ ...prev, ...updatedRoom, evaluations: prev.evaluations }));
-    });
+    };
 
-    channel.bind('evaluations-revealed', () => {
+    const handleEvaluationsRevealed = () => {
       router.refresh();
-    });
+    };
 
-    channel.bind('next-round', (data: RoomData) => {
+    const handleNextRound = (data: RoomData) => {
       if (data && data.players) {
         setRoom(prev => ({ ...prev, ...data, evaluations: prev.evaluations }));
       } else {
         router.refresh();
       }
-    });
+    };
 
-    channel.bind('evaluation-submitted', async (data: { evaluatorId: string }) => {
+    const handleEvaluationSubmitted = async (_data: { evaluatorId: string }) => {
       try {
         const res = await fetch(`/api/room/${room.id}?player=${currentPlayer.id}`);
         if (res.ok) {
@@ -176,20 +185,31 @@ export function RoomClient({
       } catch (err) {
         console.error("Failed to fetch fresh room state:", err);
       }
-    });
+    };
 
-    channel.bind('room-closed', () => {
+    const handleRoomClosed = () => {
       setRoom(prev => ({ ...prev, status: 'CLOSED' }));
-    });
+    };
 
-    channel.bind('game-finished', () => {
+    const handleGameFinished = () => {
       setRoom(prev => ({ ...prev, status: 'FINISHED' }));
+    };
+
+    const unbind = bindChannel(`room-${room.id}`, {
+      'player-joined': handlePlayerJoined,
+      'player-left': handlePlayerLeft,
+      'player-name-updated': handlePlayerNameUpdated,
+      'game-started': handleGameStarted,
+      'evaluations-revealed': handleEvaluationsRevealed,
+      'next-round': handleNextRound,
+      'evaluation-submitted': handleEvaluationSubmitted,
+      'room-closed': handleRoomClosed,
+      'game-finished': handleGameFinished,
     });
 
     return () => {
-      client.connection.unbind_all();
-      channel.unbind_all();
-      client.unsubscribe(`room-${room.id}`);
+      client.connection.unbind('state_change', onStateChange);
+      unbind(); // only removes our handlers — channel stays alive
     };
   }, [room.id, currentPlayer.id]);
 
@@ -203,14 +223,14 @@ export function RoomClient({
         if (res.ok) {
           const freshRoom = await res.json();
           setRoom(prev => {
-            const isDifferent = 
+            const isDifferent =
               prev.status !== freshRoom.status ||
               prev.currentRound !== freshRoom.currentRound ||
               prev.scenarioId !== freshRoom.scenarioId ||
               JSON.stringify(prev.players) !== JSON.stringify(freshRoom.players) ||
               JSON.stringify(prev.evaluations) !== JSON.stringify(freshRoom.evaluations) ||
               JSON.stringify(prev.messages) !== JSON.stringify(freshRoom.messages);
-            
+
             return isDifferent ? freshRoom : prev;
           });
         }
@@ -306,6 +326,11 @@ export function RoomClient({
     navigator.clipboard.writeText(roomUrl);
     alert('تم نسخ رابط الانضمام');
   };
+
+  console.log('hh', isStarting || room.players.length < 2);
+  console.log('isStarting', isStarting);
+  console.log('room.players.length', room.players.length < 2);
+
 
   // ─── LOBBY VIEW ──────────────────────────────────────────
   if (room.status === 'LOBBY') {
@@ -418,11 +443,11 @@ export function RoomClient({
               <CardFooter className="flex flex-col gap-3">
                 {currentPlayer.isHost ? (
                   <>
-                    <Button onClick={handleStartGame} disabled={isStarting || room.players.length < 2} className="w-full h-11 gap-2">
+                    <Button onClick={handleStartGame} disabled={isStarting || room.players.length < 3} className="w-full h-11 gap-2">
                       <PlayCircle className="h-5 w-5" />
                       بدء التدريب
                     </Button>
-                    <Button variant="outline" onClick={handleRedistributeRoles} disabled={isStarting || room.players.length < 2} className="w-full gap-2">
+                    <Button variant="outline" onClick={handleRedistributeRoles} disabled={isStarting || room.players.length < 3} className="w-full gap-2">
                       <RotateCcw className="h-4 w-4" />
                       إعادة توزيع الأدوار
                     </Button>
@@ -505,9 +530,9 @@ export function RoomClient({
             <Separator orientation="vertical" className="h-3" />
             <PlayerRoleBadge role={updatedCurrentPlayer.role} />
           </div>
-          
+
           <ThemeToggle />
-          
+
           {currentPlayer.isHost && room.status === 'FINISHED' && (
             <Button onClick={handleReveal} size="sm" className="bg-green-600 hover:bg-green-700 text-white font-bold h-8">
               كشف النتائج
@@ -567,7 +592,7 @@ export function RoomClient({
                     const isSeller = p.role === 'SELLER';
                     const isClient = p.role === 'CLIENT';
                     const isEvaluator = p.role === 'EVALUATOR';
-                    
+
                     const hasSubmittedEval = room.evaluations?.some(
                       (e: any) => e.evaluatorId === p.id && e.roundNumber === room.currentRound
                     );
@@ -622,7 +647,7 @@ export function RoomClient({
               initialMessages={room.messages || []}
               role={updatedCurrentPlayer.role}
             />
-            
+
             <div className={`grid grid-cols-1 ${updatedCurrentPlayer.role === 'EVALUATOR' ? 'md:grid-cols-2' : ''} gap-4`}>
               {(updatedCurrentPlayer.role === 'SELLER' || updatedCurrentPlayer.role === 'EVALUATOR') && (
                 <Card className="p-4 border bg-card/50">

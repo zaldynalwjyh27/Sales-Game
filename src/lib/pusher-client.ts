@@ -1,5 +1,5 @@
 // Client-only Pusher instance. Only import this from 'use client' components.
-import PusherClient from 'pusher-js';
+import PusherClient, { Channel } from 'pusher-js';
 
 let pusherClientInstance: PusherClient | null = null;
 
@@ -16,4 +16,34 @@ export function getPusherClient(): PusherClient {
     );
   }
   return pusherClientInstance;
+}
+
+/**
+ * Safely bind a set of event handlers to a Pusher channel.
+ * Returns a cleanup function that ONLY unbinds these specific handlers —
+ * it never calls `channel.unsubscribe()`, so other components sharing
+ * the same channel are not affected.
+ *
+ * Usage inside useEffect:
+ *   return bindChannel(`room-${id}`, { 'player-joined': handler });
+ */
+export function bindChannel(
+  channelName: string,
+  handlers: Record<string, (data: any) => void>
+): () => void {
+  const client = getPusherClient();
+
+  // Subscribe is idempotent — Pusher returns the existing channel if already subscribed
+  const channel: Channel = client.subscribe(channelName);
+
+  for (const [event, handler] of Object.entries(handlers)) {
+    channel.bind(event, handler);
+  }
+
+  // Return a cleanup that only removes our specific bindings, never unsubscribes
+  return () => {
+    for (const [event, handler] of Object.entries(handlers)) {
+      channel.unbind(event, handler);
+    }
+  };
 }

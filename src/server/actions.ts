@@ -52,7 +52,10 @@ export async function joinRoom(roomId: string, playerName: string) {
     name: player.name,
     role: player.role,
     isHost: player.isHost,
+    isLocked: player.isLocked,
     roomId: player.roomId,
+    rolesHistory: player.rolesHistory,
+    createdAt: player.createdAt,
   });
   return player;
 }
@@ -74,6 +77,12 @@ export async function updatePlayerName(roomId: string, playerId: string, newName
   const updatedPlayer = await prisma.player.update({
     where: { id: playerId },
     data: { name: newName },
+  });
+
+  // Notify all connected clients about the name change in real-time
+  await triggerPusher(`room-${roomId}`, 'player-name-updated', {
+    playerId: updatedPlayer.id,
+    name: updatedPlayer.name,
   });
 
   return updatedPlayer;
