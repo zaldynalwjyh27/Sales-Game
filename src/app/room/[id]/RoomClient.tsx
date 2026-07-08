@@ -77,9 +77,11 @@ export function RoomClient({
   const [room, setRoom] = useState<RoomData>(initialRoom);
   const router = useRouter();
 
-  useEffect(() => {
-    setRoom(initialRoom);
-  }, [initialRoom]);
+  // NOTE: Do NOT sync initialRoom back into state here.
+  // useState(initialRoom) seeds the initial state once at mount.
+  // All subsequent updates come exclusively from Pusher events and
+  // the polling fallback — overwriting state with the server prop
+  // would discard live player-joined updates received via Pusher.
 
   const [isStarting, setIsStarting] = useState(false);
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
