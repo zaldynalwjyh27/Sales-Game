@@ -138,11 +138,23 @@ export function RoomClient({
     // Use bindChannel so cleanup NEVER calls unsubscribe on the shared channel.
     // ChatInterface subscribes to the same channel — unsubscribing here would
     // silently kill its bindings too, breaking all real-time updates.
-    const handlePlayerJoined = (newPlayer: Player) => {
+    const handlePlayerJoined = async (newPlayer: Player) => {
+      // Optimistic update — show the new player instantly
       setRoom((prev) => {
         if (prev.players.find((p) => p.id === newPlayer.id)) return prev;
         return { ...prev, players: [...prev.players, newPlayer] };
       });
+      // Then fetch the full, authoritative room state so every client
+      // (admin + all participants) is perfectly in sync with the DB.
+      try {
+        const res = await fetch(`/api/room/${room.id}?player=${currentPlayer.id}`);
+        if (res.ok) {
+          const freshRoom = await res.json();
+          setRoom(freshRoom);
+        }
+      } catch (err) {
+        console.error('Failed to refresh room after player joined:', err);
+      }
     };
 
     const handlePlayerLeft = (data: { playerId: string }) => {
