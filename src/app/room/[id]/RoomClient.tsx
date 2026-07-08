@@ -327,9 +327,6 @@ export function RoomClient({
     alert('تم نسخ رابط الانضمام');
   };
 
-  console.log('hh', isStarting || room.players.length < 2);
-  console.log('isStarting', isStarting);
-  console.log('room.players.length', room.players.length < 2);
 
 
   // ─── LOBBY VIEW ──────────────────────────────────────────
@@ -393,12 +390,12 @@ export function RoomClient({
                         )}
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {(p.id === currentPlayer.id || currentPlayer.isHost) && !editingPlayerId && (
+                        {(p.id === currentPlayer.id || updatedCurrentPlayer.isHost) && !editingPlayerId && (
                           <Button variant="ghost" size="icon" onClick={() => startEditingPlayer(p.id, p.name)} className="h-8 w-8">
                             <Edit2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
-                        {currentPlayer.isHost && p.id !== currentPlayer.id && (
+                        {updatedCurrentPlayer.isHost && p.id !== currentPlayer.id && (
                           <Button variant="ghost" size="icon" onClick={() => handleRemovePlayer(p.id)} className="h-8 w-8 text-destructive">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -431,7 +428,7 @@ export function RoomClient({
                   <select
                     value={questionType}
                     onChange={(e) => setQuestionType(e.target.value)}
-                    disabled={!currentPlayer.isHost}
+                    disabled={!updatedCurrentPlayer.isHost}
                     className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {Object.values(QUESTION_TYPES).map(type => (
@@ -441,7 +438,7 @@ export function RoomClient({
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-3">
-                {currentPlayer.isHost ? (
+                {updatedCurrentPlayer.isHost ? (
                   <>
                     <Button onClick={handleStartGame} disabled={isStarting || room.players.length < 3} className="w-full h-11 gap-2">
                       <PlayCircle className="h-5 w-5" />
